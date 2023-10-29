@@ -1,0 +1,10 @@
+/vendor/
+/.idea/.gitignore
+/.idea/barcode.iml
+/.idea/codeception.xml
+/.idea/modules.xml
+/.idea/php.xml
+/.idea/phpspec.xml
+/.idea/phpunit.xml
+/.idea/vcs.xml
+/composer.lock
