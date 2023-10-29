@@ -1,8 +1,8 @@
 {
-    "name": "kreativekorp/barcode",
+    "name": "cis/barcode",
     "type": "library",
-    "description": "Generate barcodes from a single PHP file.",
-    "homepage": "https://github.com/kreativekorp/barcode/",
+    "description": "Simple Barcode-Class based on the one-file barcode-class by kreativekorp",
+    "homepage": "https://github.com/cis/barcode/",
     "license": [
       "MIT"
     ],
@@ -11,9 +11,21 @@
             "name": "Kreative Software",
             "email": "support@kreativekorp.com",
             "homepage": "http://www.kreativekorp.com"
+        },
+        {
+            "name": "CIS Bad Vilbel",
+            "email": "kontakt@cis-badvilbel.de",
+            "homepage": "https://www.cis-badvilbel.de"
         }
     ],
     "autoload": {
-        "classmap": ["barcode.php"]
+        "psr-4": {
+            "Cis\\Barcode\\": "src"
+        }
+    },
+    "require": {
+        "php": "^8.2",
+        "ext-gd": "*",
+        "ext-zlib": "*"
     }
 }

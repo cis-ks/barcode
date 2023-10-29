@@ -5,77 +5,57 @@
   * Output to PNG, GIF, JPEG, or SVG.
   * Generates UPC-A, UPC-E, EAN-13, EAN-8, Code 39, Code 93, Code 128, GS1 128, Codabar, ITF, QR Code, GS1 QR Code, DataMatrix and GS1 DataMatrix.
 
-### Use directly as a PHP script with GET or POST:
+
+### Use the Library in  your own work. Ensure that you have loaded the autoloader
 
 ```
-barcode.php?f={format}&s={symbology}&d={data}&{options}
-```
+use Cis\Barcode\Barcode;
+use Cis\Barcode\BarcodeType\Code39;
+use Cis\Barcode\Exceptions\CreateImageException;
+use Cis\Barcode\Render\ImageRender;
+use Cis\Barcode\Render\SvgRender;
+use Cis\Barcode\Symbology;
 
-e.g.
+$barcode = new Barcode(new Code39());
+$svgRender = new SvgRender($barcode);
+$imageRender = new ImageRender($barcode);
 
-```
-barcode.php?f=png&s=upc-e&d=06543217
-barcode.php?f=svg&s=qr&d=HELLO%20WORLD&sf=8&ms=r&md=0.8
-```
+/* Define necessary Options */
+$options = [];
 
-**When using this method, you must escape non-alphanumeric characters with URL encoding, for example `%26` for `&` or `%2F` for `?`.**
+/* Generate PNG for Barcode and save it to File */
+try {
+    $imageRender->render(Symbology::EAN_13, '9780201376548', $options)->toPng('/tmp/9780201376548_barcode.png');
+} catch (CreateImageException $e) {
+    echo $e->getMessage();
+}
 
-### Or use as a library from another PHP script:
+/* Retrieve the data directly and send it as output */
+try {
+    $imageData = $imageRender->render(Symbology::CODE_128, '9780201376548', $options)->toJpeg();
+    header('Content-Type: image/jpeg');
+    echo $imageData;
+} catch (CreateImageException $e) {
+    echo $e->getMessage();
+}
 
-```
-include 'barcode.php';
-
-$generator = new barcode_generator();
-
-/* Output directly to standard output. */
-header("Content-Type: image/$format");
-$generator->output_image($format, $symbology, $data, $options);
-
-/* Create bitmap image and write to standard output. */
-header('Content-Type: image/png');
-$image = $generator->render_image($symbology, $data, $options);
-imagepng($image);
-imagedestroy($image);
-
-/* Create bitmap image and write to file. */
-$image = $generator->render_image($symbology, $data, $options);
-imagepng($image, $filename);
-imagedestroy($image);
-
-/* Generate SVG markup and write to standard output. */
-header('Content-Type: image/svg+xml');
-$svg = $generator->render_svg($symbology, $data, $options);
+/* Generate SVG and write it to output */
+$svg = $svgRender->render(Symbology::QR, 'Simple Encode QR-Data', $options);
 echo $svg;
 
-/* Generate SVG markup and write to file. */
-$svg = $generator->render_svg($symbology, $data, $options);
-file_put_contents($filename, $svg);
+/* Generate SVG and write it to a file */
+$svg = $svgRender->render(Symbology::QR, 'Simple Encode QR-Data', $options);
+file_put_contents('/tmp/barcode.svg', $svg);
 ```
+### Data:
 
-**When using this method, you must NOT use URL encoding.**
+For UPC or EAN, use `*` for missing digit. 
+For Codabar, use `ABCD` or `ENT*` for start and stop characters. 
+For QR, encode in Shift-JIS for kanji mode.
 
 ### Options:
 
-`f` - Format. One of:
-```
-    png
-    gif
-    jpeg
-    svg
-```
-
-`s` - Symbology (type of barcode). One of:
-```
-    upc-a          code-39         qr         gs1-qr-q     gs1-dmtx-r
-    upc-e          code-39-ascii   qr-l       gs1-qr-h
-    ean-8          code-93         qr-m       dmtx
-    ean-13         code-93-ascii   qr-q       dmtx-s
-    ean-13-pad     code-128        qr-h       dmtx-r
-    ean-13-nopad   codabar         gs1-qr-l   gs1-dmtx
-    ean-128        itf             gs1-qr-m   gs1-dmtx-s
-```
-
-`d` - Data. For UPC or EAN, use `*` for missing digit. For Codabar, use `ABCD` or `ENT*` for start and stop characters. For QR, encode in Shift-JIS for kanji mode.
+Add this data as key/value pair into the options-Array.
 
 `w` - Width of image. Overrides `sf` or `sx`.
 
@@ -130,13 +110,12 @@ file_put_contents($filename, $svg);
 #### Keywords:
 
 `\FNC1`
-- used in `d` - Data option as a part of the data string.
+- used in Data as a part of the data string.
 - when used, it is replaced with a Group separator &lt;GS&gt; ASCII char 29 in encoded data string.
 - it should be used to terminate variable length GS1 Application Identifiers in GS1 128 and GS1 DataMatrix barcodes.
-- if needed, you can replace `\FNC1` keyword with `yourKeyword` in barcode.php file, the functionality will remain. Do not forget to replace all occurrences.
-- available in barcode symbologies:
+- available in barcode symbology:
 ```
-    ean-128     gs1-dmtx-s    gs1-qr-l   gs1-qr-q
-    gs1-dmtx    gs1-dmtx-r    gs1-qr-m   gs1-qr-h
+    EAN_128     GS1_DMTX_S    GS1_QR_L   GS1_QR_Q
+    GS1_DMTX    GS1_DMTX_R    GS1_QR_M   GS1_QR_H
 ```
-- Do not confuse this with &lt;FNC1&gt; character. Initially, it was intended to use the &lt;FNC1&gt; character as a separator character, but since according to [this stackoverflow answer](https://stackoverflow.com/questions/31318648/what-is-the-actual-hex-binary-value-of-the-gs1-fnc1-character/31322815#31322815) by Terry Burton, FNC1 is a non-data character that requires special treatment. And I dont want to fizzle around this when it is not necessary. Instead, I decided to use the &lt;GS&gt; character. According to the [GS1 General Specifications](https://www.gs1.org/standards/barcodes-epcrfid-id-keys/gs1-general-specifications), the &lt;FNC1&gt; and &lt;GS&gt; characters are in the role of a separator character substitutes. The `\FNC1` remained as a keyword for its uniqueness. If you need, you can replace it with `\GS` or any other keyword you consider unique.
+- Do not confuse this with &lt;FNC1&gt; character. Initially, it was intended to use the &lt;FNC1&gt; character as a separator character, but since according to [this stackoverflow answer](https://stackoverflow.com/questions/31318648/what-is-the-actual-hex-binary-value-of-the-gs1-fnc1-character/31322815#31322815) by Terry Burton, FNC1 is a non-data character that requires special treatment. And I don't want to fizzle around this when it is not necessary. Instead, I decided to use the &lt;GS&gt; character. According to the [GS1 General Specifications](https://www.gs1.org/standards/barcodes-epcrfid-id-keys/gs1-general-specifications), the &lt;FNC1&gt; and &lt;GS&gt; characters are in the role of a separator character substitutes. The `\FNC1` remained as a keyword for its uniqueness. If you need, you can replace it with `\GS` or any other keyword you consider unique.
