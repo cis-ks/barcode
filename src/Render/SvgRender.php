@@ -10,7 +10,7 @@ readonly class SvgRender extends BarcodeRender
      * @param array $options
      * @return string
      */
-    public function render(string $symbology, string $data, array $options): string
+    public function render(string $symbology, string $data, array $options = []): string
     {
         $svgTemplate = <<<SVG
 <?xml version="1.0"?>
@@ -42,7 +42,7 @@ SVG;
             $width,
             $height,
             $bgcolor ? sprintf(
-                '<rect x="0" y="0" width="%s" height="%s" fill=\"%s\" />',
+                '<rect x="0" y="0" width="%s" height="%s" fill="%s" />',
                 $width,
                 $height,
                 htmlspecialchars($bgcolor)
@@ -267,7 +267,12 @@ SVG;
      * @param string $svg
      * @return void
      */
-    private function generateLinearBlocks($m, $colors, $widths, mixed &$mx, mixed $mh, string &$svg): void
+    private function generateLinearBlocks(array  $m,
+                                          array  $colors,
+                                          array  $widths,
+                                          mixed  &$mx,
+                                          mixed  $mh,
+                                          string &$svg): void
     {
         foreach ($m as $module) {
             $mc = htmlspecialchars($colors[$module[0]]);

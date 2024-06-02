@@ -2,7 +2,7 @@
 
 namespace Cis\Barcode\BarcodeType;
 
-class Codeabar implements TypeInterface
+class Codabar implements TypeInterface
 {
     private const ALPHABET = [
         '0' => [1, 1, 1, 1, 1, 2, 2],
@@ -50,7 +50,7 @@ class Codeabar implements TypeInterface
     {
         $data = strtoupper(preg_replace(self::REGEX_DATA_CLEAN, '', $data));
         $blocks = [];
-        for ($i = 0, $n = strlen($data); $i < $n; $i++) {
+        for ($i = 0; $i < strlen($data); $i++) {
             if ($blocks) {
                 $blocks[] = [
                     'm' => [[0, 1, 3]]

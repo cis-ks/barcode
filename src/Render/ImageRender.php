@@ -21,7 +21,7 @@ class ImageRender implements RenderInterface
      * @return ImageRender
      * @throws CreateImageException
      */
-    public function render(string $symbology, string $data, array $options): static
+    public function render(string $symbology, string $data, array $options = []): static
     {
         list($code, $widths, $width, $height, $x, $y, $w, $h) =
             $this->barcode->encodeCalculateSize($symbology, $data, $options);
